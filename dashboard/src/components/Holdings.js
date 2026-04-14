@@ -1,29 +1,36 @@
  import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { VerticalGraph } from "./VerticalGraph";
-import { useNavigate } from "react-router-dom";
+
+const getCookieValue = (name) => {
+  const cookie = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith(`${name}=`));
+  return cookie ? decodeURIComponent(cookie.split("=")[1]) : null;
+};
 
 const Holdings = () => {
   const [allHoldings, setAllHoldings] = useState([]);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    // 🔐 token uthao
-    const token = localStorage.getItem("token");
+    const localToken = localStorage.getItem("token");
+    const cookieToken = getCookieValue("auth_token");
+    const token = localToken || cookieToken;
 
-    // ❌ token nahi → login page
+    if (!localToken && cookieToken) {
+      localStorage.setItem("token", cookieToken);
+    }
+
     if (!token) {
       alert("Please login first");
-      navigate("/login");
+      window.location.href = "http://localhost:3000/login";
       return;
     }
 
-    // 🔐 token ke saath API call 
     axios
       .get("http://localhost:3002/allHoldings", {
         headers: {
-          // Authorization: token, 
-         Authorization: `Bearer ${token}`,  // fixed 
+          Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => {
@@ -34,9 +41,10 @@ const Holdings = () => {
         console.log(err);
         alert("Session expired. Please login again");
         localStorage.removeItem("token");
-        navigate("/login");
+        document.cookie = "auth_token=; path=/; max-age=0; samesite=lax";
+        window.location.href = "http://localhost:3000/login";
       });
-  }, [navigate]);
+  }, []);
 
   const labels = allHoldings.map((item) => item.name);
 
