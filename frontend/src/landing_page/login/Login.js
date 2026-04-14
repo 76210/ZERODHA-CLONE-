@@ -27,14 +27,19 @@ const Login = () => {
         formData
       );
 
-      localStorage.setItem("token", res.data.token);
+      const token = res.data?.token;
+      if (!token) {
+        throw new Error("Token missing in login response");
+      }
+
+      localStorage.setItem("token", token);
+      document.cookie = `auth_token=${encodeURIComponent(token)}; path=/; max-age=${60 * 60 * 24}; samesite=lax`;
 
       alert(res.data.message); 
-      /// window.location.href = "http://localhost:3000/dashboard";  
-     window.location.href = "http://localhost:3001/dashboard"; 
+      window.location.href = "http://localhost:3001/dashboard"; 
       //navigate("/dashboard"); // ✅ AB ROUTE EXIST KARTA HAI
     } catch (err) {
-      alert(err.response?.data?.message || "Login failed");
+      alert(err.response?.data?.message || err.message || "Login failed");
     }
   };
 return (

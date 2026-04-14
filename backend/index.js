@@ -1,5 +1,4 @@
 require('dotenv').config();
-console.log(process.env.MONGO_URL);
 
 const express = require("express"); 
 const mongoose = require("mongoose"); 
@@ -14,7 +13,7 @@ const authRoutes = require("./routes/auth");////
 const holdingsRoutes = require("./routes/holdings"); ////
 
 const PORT = process.env.PORT || 3002; 
-const url = process.env.MONGO_URL;  
+const url = process.env.MONGO_URL || process.env.MONGO_URI;  
 
 const app = express(); 
 
@@ -232,6 +231,11 @@ app.post("/newOrder", async (req, res) => {
 });
  
 // 🔥 ONLY THIS AT THE END 🔥
+if (!url) {
+  console.error("Missing MongoDB URI. Set MONGO_URL or MONGO_URI in backend/.env");
+  process.exit(1);
+}
+
 mongoose.connect(url)
   .then(() => {
     console.log("DB was connected");
