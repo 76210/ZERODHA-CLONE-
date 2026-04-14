@@ -5,7 +5,7 @@ This service powers authentication and portfolio APIs for the Zerodha clone.
 ## What was fixed for Holdings
 
 The backend login flow was returning only a user object, so the dashboard never received a usable auth token. The Holdings request also depended on the token being present in the `Authorization` header.
-
+ 
 The backend now:
 
 - accepts `MONGO_URL` or `MONGO_URI` from `.env`
